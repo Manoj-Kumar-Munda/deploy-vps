@@ -1,0 +1,30 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 201.18.196.106
+          username: root
+          password: Manoj@work99
+          script: |
+            cd /root
+            if [ -d "deploy-vps" ]; then
+              cd deploy-vps
+              git pull origin main
+            else
+              git clone https://github.com/${{ github.repository }}.git deploy-vps
+              cd deploy-vps
+            fi
+            npm install
+            pm2 restart deploy-vps || pm2 start index.js --name deploy-vps
